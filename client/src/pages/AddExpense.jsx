@@ -6,13 +6,19 @@ import { Button } from "@/components/ui/button";
 function AddExpense() {
   const [category, setCategory] = useState("");
   const [amount, setAmount] = useState("");
+  const [date, setDate] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios.post("http://localhost:5000/api/expenses", {
-      category,
-      amount,
-    });
+    await axios.post(
+      "http://localhost:5000/api/expenses",
+      {
+        category,
+        amount,
+        date,
+      },
+      { withCredentials: true }
+    );
     window.location.href = "/dashboard";
   };
 
@@ -29,6 +35,11 @@ function AddExpense() {
           type="number"
           placeholder="Amount"
           onChange={(e) => setAmount(e.target.value)}
+        />
+        <Input
+          type="date"
+          placeholder="Date"
+          onChange={(e) => setDate(e.target.value)}
         />
         <Button type="submit" className="w-full">
           Add

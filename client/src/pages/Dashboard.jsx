@@ -15,7 +15,7 @@ function Dashboard() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/expenses")
+      .get("http://localhost:5000/api/expenses", { withCredentials: true })
       .then((res) => setExpenses(res.data));
   }, []);
 
