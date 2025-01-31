@@ -9,33 +9,202 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useSearchParams } from "react-router-dom";
+import {
+  Banknote,
+  ChartColumnIncreasing,
+  Coins,
+  DollarSign,
+  TrendingUp,
+} from "lucide-react";
+import { DataTable } from "@/components/custom/DataTable";
+import { columns } from "@/components/custom/Columns";
+
+// const columns = [
+//   {
+//     id: "name",
+//     Header: () => <span>Expense Name</span>, // You can use JSX for custom rendering
+//     renderHeader: () => <span>Expense Name</span>, // You can use JSX for custom rendering
+//     accessor: "name",
+//   },
+//   {
+//     id: "category",
+//     Header: () => <span>Category</span>, // Custom rendering if needed
+//     renderHeader: () => <span>Expense Name</span>, // You can use JSX for custom rendering
+//     accessor: "category",
+//   },
+//   {
+//     id: "amount",
+//     Header: () => <span>Amount</span>,
+//     renderHeader: () => <span>Expense Name</span>, // You can use JSX for custom rendering
+//     accessor: "amount",
+//     Cell: ({ value }) => `$${value.toLocaleString()}`,
+//   },
+//   {
+//     id: "date",
+//     Header: () => <span>Date</span>,
+//     renderHeader: () => <span>Expense Name</span>, // You can use JSX for custom rendering
+//     accessor: "date",
+//     Cell: ({ value }) => new Date(value).toLocaleDateString(),
+//   },
+// ];
 
 function Dashboard() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [expenses, setExpenses] = useState([]);
+  const [data, setData] = useState([]);
 
   useEffect(() => {
     axios
       .get("http://localhost:5000/api/expenses", { withCredentials: true })
-      .then((res) => setExpenses(res.data));
+      .then((res) => {
+        // Group data by category
+        const groupedData = res.data.reduce((acc, item) => {
+          if (!acc[item.category]) {
+            acc[item.category] = { category: item.category, amount: 0 };
+          }
+          acc[item.category].amount += Number(item.amount);
+          return acc;
+        }, {});
+
+        setExpenses(Object.values(groupedData));
+
+        // Set data for the table as well
+        setData(res.data);
+      });
   }, []);
+
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
+
+  const updateFilter = (days) => {
+    setSearchParams({ last: days });
+  };
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={expenses}>
-          <XAxis dataKey="category" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="amount" fill="#4f46e5" />
-        </BarChart>
-      </ResponsiveContainer>
-      <Button
+      <div className="w-full flex justify-between items-start">
+        <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
+
+        {/* Filter Buttons */}
+        <div className="bg-white rounded-lg shadow-md p-1 flex gap-1">
+          {["7", "30", "90"].map((days) => (
+            <button
+              key={days}
+              className="px-3 py-1 rounded-md transition-all"
+              disabled={searchParams.get("last") === days}
+              style={{
+                background:
+                  searchParams.get("last") === days ? "#18181b" : "#fafafa",
+                color:
+                  searchParams.get("last") === days ? "#fafafa" : "#090909",
+                cursor:
+                  searchParams.get("last") === days ? "not-allowed" : "pointer",
+              }}
+              onClick={() => updateFilter(days)}
+              onMouseEnter={(e) => {
+                e.target.style.background = "#18181b";
+                e.target.style.color = "#fafafa";
+              }}
+              onMouseLeave={(e) => {
+                if (searchParams.get("last") !== days) {
+                  e.target.style.background = "#fafafa";
+                  e.target.style.color = "#090909";
+                }
+              }}
+            >
+              Past {days} days
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-center gap-4 mt-8">
+        {/* BAR GRAPH */}
+        <div className="w-[550px] h-fit flex">
+          <div className="w-[550px] p-4 bg-white border-2 rounded-xl">
+            <h1 className="mb-4 font-bold text-xl">Category-wise expenses</h1>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={expenses}>
+                <XAxis dataKey="category" fontSize={12} minTickGap={-200} />
+                <YAxis />
+                <Tooltip cursor={{ fill: "transparent" }} />
+                <Bar
+                  dataKey="amount"
+                  fill="#232324"
+                  radius={[8, 8, 0, 0]} // Rounded top bars
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* STATISTICS CARDS */}
+        <div className="w-full flex flex-col items-end gap-4">
+          {/* STATISTICS CARD */}
+          <div className=" p-4 rounded-md shadow-md bg-white w-[90%] border-t-[1px] border-zinc-100 flex gap-4 items-center">
+            <span className="rounded-full bg-zinc-900 p-3">
+              <DollarSign size={36} color="white" />
+            </span>
+            <span className="flex flex-col gap-1">
+              <span className=" text-zinc-700 text-sm ">Total Expenses</span>
+              <span className=" text-zinc-900 uppercase text-2xl font-semibold">
+                ${`${(12870).toLocaleString("en-US")}`}
+              </span>
+            </span>
+          </div>
+
+          <div className=" p-4 rounded-md shadow-md bg-white w-[90%] border-t-[1px] border-zinc-100 flex gap-4 items-center">
+            <span className="rounded-full bg-zinc-900 p-3">
+              <Banknote size={36} color="white" />
+            </span>
+            <span className="flex flex-col gap-1">
+              <span className=" text-zinc-700 text-sm ">Top Spends</span>
+              <span className=" text-zinc-900 text-2xl font-semibold">
+                Travel
+              </span>
+            </span>
+          </div>
+
+          <div className=" p-4 rounded-md shadow-md bg-white w-[90%] border-t-[1px] border-zinc-100 flex gap-4 items-center">
+            <span className="rounded-full bg-zinc-900 p-3">
+              <TrendingUp size={36} color="white" />
+            </span>
+            <span className="flex flex-col gap-1">
+              <span className=" text-zinc-700 text-sm ">
+                Expense Growth Rate
+              </span>
+              <span className=" text-zinc-900 uppercase text-2xl font-semibold">
+                6%
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* <div className="w-full mt-4 h-44 bg-black rounded-md"></div> */}
+
+      {/* Data Table */}
+      <div className="container mx-auto py-10">
+        {/* Data Table */}
+        <div className="">
+          <DataTable
+            data={data}
+            columns={columns}
+            pagination={true} // Enable pagination
+            filters={true} // Enable filtering
+          />
+        </div>
+      </div>
+
+      {/* Add Expense Button */}
+      {/* <Button
         className="mt-4"
         onClick={() => (window.location.href = "/add-expense")}
       >
         Add Expense
-      </Button>
+      </Button> */}
     </div>
   );
 }
