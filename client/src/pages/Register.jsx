@@ -29,26 +29,54 @@ function Register() {
     e.preventDefault();
     setErrors({}); // Clear previous errors
 
-    if (password !== confirmPassword) {
-      setErrors({ confirmPassword: "Passwords do not match" });
+    const newErrors = {};
+
+    if (!firstName.trim()) newErrors.firstName = "First Name is required";
+    if (!lastName.trim()) newErrors.lastName = "Last Name is required";
+
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(email)) {
+      newErrors.email = "Please enter a valid email";
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters long";
+    }
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = "Confirm Password is required";
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
     try {
       setIsLoading(true);
-      await axios.post("http://localhost:5000/api/auth/register", {
-        firstName,
-        lastName,
-        email,
-        password,
-      });
+      await axios.post(
+        "http://localhost:5000/api/auth/register",
+        {
+          firstName,
+          lastName,
+          email,
+          password,
+        },
+        { withCredentials: true }
+      );
       setIsLoading(false);
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       setIsLoading(false);
 
       if (error.response && error.response.data.errors) {
-        setErrors(error.response.data.errors); // Set errors from backend
+        setErrors(error.response.data.errors); // Backend validation errors
       } else {
         console.error("Registration failed", error);
       }
