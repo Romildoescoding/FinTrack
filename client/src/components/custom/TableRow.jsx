@@ -4,10 +4,12 @@ import { formatDate } from "date-fns";
 import { useState } from "react";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const TableRow = ({ entry, onDelete }) => {
   const [showOptions, setShowOptions] = useState("");
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   async function handleDelete(e) {
     e.preventDefault();
@@ -44,51 +46,21 @@ const TableRow = ({ entry, onDelete }) => {
     }
   }
 
-  async function handleEdit(e) {
-    e.preventDefault();
-
-    const newAmount = prompt("Enter the new amount:", entry.amount);
-    if (!newAmount) return;
-
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/expenses/${entry._id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ amount: parseFloat(newAmount) }),
-        }
-      );
-
-      if (response.ok) {
-        alert("Expense updated successfully");
-        window.location.reload(); // Refresh the page or update state
-      } else {
-        alert("Failed to update expense");
-      }
-    } catch (error) {
-      console.error("Error updating expense:", error);
-    }
-  }
-
   return (
     <tr className="border-t relative overflow-visible font-normal">
       {/* Mapping the data fields to rows */}
-      <td className="px-6 py-4 text-sm text-gray-700">
+      <td className="px-3 text-sm text-gray-700">
         <span>{entry.category}</span>
       </td>
-      <td className="px-6 py-4 text-sm text-gray-700">
+      <td className="px-3 text-sm text-gray-700">
         {/* Format the amount as currency */}
         <span>{`$${entry.amount.toFixed(2)}`}</span>
       </td>
-      <td className="px-6 py-4 text-sm text-gray-700">
+      <td className="px-3 text-sm text-gray-700">
         {/* Format the date */}
         <span>{formatDate(entry.date, "MMM dd, yyyy")}</span>
       </td>
-      <td className="px-6 py-4 text-sm text-gray-700">
+      <td className="px-3 text-sm text-gray-700">
         <span>
           {entry.description.length > 50
             ? entry.description.slice(0, 50) + "..."
@@ -105,7 +77,7 @@ const TableRow = ({ entry, onDelete }) => {
           <span className="absolute flex flex-col gap-1 top-[75%] z-[9999] left-[90%] rounded-lg h-fit w-fit p-2 bg-zinc-50 shadow-md shadow-[#ccc] ">
             <span
               className="flex gap-2 cursor-pointer items-center pointer w-full rounded-md h-fit p-2 hover:bg-zinc-200"
-              onClick={handleEdit}
+              onClick={() => navigate(`/edit-expense/${entry._id}`)}
             >
               <Pen size={15} color="#18181b" /> Edit
             </span>

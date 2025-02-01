@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import AddExpense from "./pages/AddExpense";
 import AppLayout from "./AppLayout";
 import { Toaster } from "./components/ui/toaster";
+import EditExpense from "./pages/EditExpense";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/add-expense" element={<AddExpense />} />
+          <Route path="/edit-expense/:id" element={<EditExpense />} />
         </Route>
       </Routes>
     </>

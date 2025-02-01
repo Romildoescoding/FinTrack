@@ -2,8 +2,13 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import authenticateToken from "../middleware/auth.js";
 
 const router = express.Router();
+
+router.get("/user", authenticateToken, (req, res) => {
+  res.status(200).json(req.user);
+});
 
 router.post("/register", async (req, res) => {
   try {
@@ -20,9 +25,13 @@ router.post("/register", async (req, res) => {
       password: hashedPassword,
     });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { id: user._id, ...user._doc },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
 
     res
       .status(201)
@@ -54,16 +63,25 @@ router.post("/login", async (req, res) => {
   if (!user || !(await bcrypt.compare(password, user.password)))
     return res.status(400).json({ message: "Invalid credentials" });
 
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  });
+  const token = jwt.sign(
+    { id: user._id, ...user._doc },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "1h",
+    }
+  );
   res
     .cookie("token", token, { httpOnly: true })
     .json({ message: "Login successful!" });
 });
 
 router.post("/logout", (req, res) => {
-  res.clearCookie("token").json({ message: "Logged out!" });
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+  });
+  return res.status(200).json({ message: "Logged out successfully" });
 });
 
 export default router;

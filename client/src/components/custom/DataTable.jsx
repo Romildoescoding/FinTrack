@@ -2,21 +2,21 @@ import React, { useState, useEffect } from "react";
 import { Input } from "../ui/input";
 import { Ellipsis, Pen, Trash2 } from "lucide-react";
 import TableRow from "./TableRow";
+import useFetchExpenses from "@/hooks/useFetchExpenses";
+import { useSearchParams } from "react-router-dom";
+import Spinner from "./Spinner";
 
-export function DataTable({ data, pagination = true, filters = true }) {
-  const [expenses, setExpenses] = useState(data);
+export function DataTable({ pagination = true, filters = true }) {
+  const { data, setData, totalCount, loading } = useFetchExpenses();
   const [filteredData, setFilteredData] = useState(data);
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Update filteredData whenever expenses, search, or pagination changes
+  // Update filteredData whenever data, search, or pagination changes
   useEffect(() => {
-    setExpenses(data); // Ensure expenses updates when data changes
-  }, [data]);
-
-  useEffect(() => {
-    let updatedData = [...expenses];
+    let updatedData = [...data];
 
     // Apply search filter
     if (search.trim() !== "") {
@@ -32,17 +32,28 @@ export function DataTable({ data, pagination = true, filters = true }) {
     const endIndex = startIndex + rowsPerPage;
 
     setFilteredData(updatedData.slice(startIndex, endIndex));
-  }, [expenses, search, currentPage, rowsPerPage]);
+  }, [data, search, currentPage, rowsPerPage]);
 
-  // Handle deleting an expense
-  const handleDeleteExpense = (id) => {
-    setExpenses((prev) => prev.filter((expense) => expense._id !== id));
-  };
+  useEffect(() => {
+    setFilteredData(data);
+    console.log(data);
+  }, [data, setData]);
 
-  const totalPages = Math.ceil(expenses.length / rowsPerPage);
+  useEffect(() => {
+    searchParams.set("page", currentPage);
+    searchParams.set("limit", rowsPerPage);
+    setSearchParams(searchParams);
+  }, [currentPage, rowsPerPage, searchParams, setSearchParams]);
+
+  const totalPages = Math.ceil(totalCount / rowsPerPage); // Use totalCount to calculate total pages
 
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  // Handle deleting an expense
+  const handleDeleteExpense = (id) => {
+    setData((prev) => prev.filter((expense) => expense._id !== id));
   };
 
   const handleNextPage = () => {
@@ -50,11 +61,11 @@ export function DataTable({ data, pagination = true, filters = true }) {
   };
 
   return (
-    <div className="bg-white shadow-lg border-t-[1px] border-zinc-100 rounded-lg p-6">
+    <div className="bg-white shadow-lg border-t-[1px] border-zinc-100 rounded-lg px-2 py-6 sm:p-6">
       {/* Search Filter */}
       <h1 className="text-2xl font-bold">All Expenses</h1>
       {filters && (
-        <div className="flex items-center space-x-2 gap-8 py-4">
+        <div className="flex items-center space-x-2 sm:gap-8 py-4 flex-col gap-2 sm:flex-row">
           <label htmlFor="filter" className="text-sm font-medium">
             Filter by Amount, Date or Categories :
           </label>
@@ -70,8 +81,8 @@ export function DataTable({ data, pagination = true, filters = true }) {
       )}
 
       {/* Table */}
-      <div className="rounded-md shadow-sm border bg-gray-50">
-        <table className="min-w-full table-auto">
+      <div className="rounded-md shadow-sm max-w-[85vw] overflow-x-scroll border bg-gray-50">
+        <table className="min-w-full table-auto min-h-[574px]">
           <thead className="bg-zinc-900 text-zinc-50 uppercase">
             <tr>
               <th className="px-6 py-3 text-left text-sm font-medium tracking-wider">
@@ -91,7 +102,7 @@ export function DataTable({ data, pagination = true, filters = true }) {
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className=" relative">
             {filteredData.length > 0 ? (
               filteredData.map((entry, index) => (
                 <TableRow
@@ -100,6 +111,10 @@ export function DataTable({ data, pagination = true, filters = true }) {
                   onDelete={handleDeleteExpense}
                 />
               ))
+            ) : loading ? (
+              <div className=" fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-2  flex justify-center items-center">
+                <Spinner height={24} width={24} />
+              </div>
             ) : (
               <tr>
                 <td colSpan={5} className="text-center py-4 text-gray-500">
@@ -113,7 +128,7 @@ export function DataTable({ data, pagination = true, filters = true }) {
 
       {/* Pagination */}
       {pagination && (
-        <div className="flex items-center justify-between py-4">
+        <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row items-center justify-between py-4">
           <div className="text-sm text-gray-500">
             Showing{" "}
             <span className="font-bold">
@@ -121,9 +136,9 @@ export function DataTable({ data, pagination = true, filters = true }) {
             </span>{" "}
             to{" "}
             <span className="font-bold">
-              {Math.min(currentPage * rowsPerPage, expenses.length)}
+              {Math.min(currentPage * rowsPerPage, totalCount)}
             </span>{" "}
-            of <span className="font-bold">{expenses.length}</span> entries
+            of <span className="font-bold">{totalCount}</span> entries
           </div>
           <div className="flex space-x-2">
             <button

@@ -9,34 +9,43 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  Calendar,
-  Home,
-  Search,
-  Settings,
-  HandCoins,
-  LogOut,
-  UserRound,
-} from "lucide-react";
+import { Home, HandCoins, LogOut, UserRound, Menu } from "lucide-react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
+import useUser from "./hooks/useUser";
 
 const menuItems = [
   { title: "Home", url: "/dashboard", icon: Home },
   { title: "Expenses", url: "/add-expense", icon: HandCoins },
-  { title: "Calendar", url: "/calendar", icon: Calendar },
-  { title: "Search", url: "/search", icon: Search },
-  { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 export default function AppLayout() {
   const location = useLocation();
+  const { user, loading, error } = useUser();
+  console.log(user);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("http://localhost:5000/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      console.log("Logged out successfully");
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
 
   return (
     <SidebarProvider>
       <div className="w-screen h-full">
         <div className="flex h-screen">
           {/* Sidebar */}
-          <Sidebar className="w-64 bg-white border-r border-gray-200">
+          <Sidebar
+            className="w-64 bg-white border-r border-gray-200 sm:bg-white md:bg-white lg:bg-white"
+            style={{ bgColor: "white !important" }}
+          >
             <SidebarContent>
               <SidebarGroup className="flex flex-col gap-8">
                 <SidebarGroupLabel className="text-zinc-950 h-fit flex items-center text-2xl px-4">
@@ -59,7 +68,7 @@ export default function AppLayout() {
                               }`}
                             >
                               <item.icon
-                                className={`w-5 h-5 ${
+                                className={` ${
                                   isActive ? "text-gray-900" : "text-gray-400"
                                 }`}
                               />
@@ -77,29 +86,35 @@ export default function AppLayout() {
 
           {/* Main Content */}
           <main className="flex-1">
-            <header className="bg-white p-4 py-2 shadow flex justify-end w-full">
+            <header className="bg-white z-[2] p-4 py-2 shadow flex justify-end w-full fixed top-0 right-0">
               {/* <SidebarTrigger /> */}
+              <SidebarTrigger className="absolute top-4 left-4 z-10 p-2">
+                <Menu size={24} />
+              </SidebarTrigger>
               <div className="h-fit w-fit flex gap-6 items-center">
                 <div className="flex gap-2 items-center">
                   <img
-                    src="../logo.avif"
+                    src="https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg"
                     className="h-10 w-10 rounded-full shadow hover:shadow-md cursor-pointer"
                   />
                   <span className="text-sm text-zinc-700 font-medium">
-                    Romil Raj Rana
+                    {user?.firstName} {user?.lastName}
                   </span>
                 </div>
                 <div className="flex gap-2 items-center">
                   <button className="h-fit w-fit p-1 py-2 rounded-md bg-white hover:bg-zinc-200">
                     <UserRound color="#090909" size={24} />
                   </button>
-                  <button className="h-fit w-fit p-1 py-2 rounded-md bg-white hover:bg-zinc-200">
+                  <button
+                    className="h-fit w-fit p-1 py-2 rounded-md bg-white hover:bg-zinc-200"
+                    onClick={handleLogout}
+                  >
                     <LogOut color="#090909" size={24} />
                   </button>
                 </div>
               </div>
             </header>
-            <div className="p-4">
+            <div className="mt-16 p-4">
               <Outlet />
             </div>
           </main>

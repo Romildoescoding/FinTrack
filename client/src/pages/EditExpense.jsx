@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/command";
 import Spinner from "@/components/custom/Spinner";
 import { useToast } from "@/hooks/use-toast";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const categories = [
   "Food",
@@ -32,81 +32,105 @@ const categories = [
   "Other",
 ];
 
-function AddExpense() {
+function EditExpense() {
+  const { id } = useParams(); // Capture the id from the route
   const [category, setCategory] = useState("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  // const navigate = useNavigate();
-
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    // Fetch the existing expense data based on the `id` from the URL
+    async function fetchExpense() {
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/api/expenses/expense/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            withCredentials: true,
+          }
+        );
+        const data = response.data;
+        setCategory(data.category || "");
+        setAmount(data.amount || "");
+        setDescription(data.description || "");
+        setDate(data.date ? new Date(data.date) : null);
+      } catch (error) {
+        toast({
+          title: "Error fetching data",
+          description: "Failed to load expense details.",
+        });
+      }
+    }
+
+    fetchExpense();
+  }, [id, toast]);
+
+  async function handleEdit(e) {
     e.preventDefault();
-
-    // **Frontend Validation**
     if (!amount || !date || !category || !description) {
       toast({
         title: "Missing Fields",
-        description: "Please fill in all fields before submitting.",
+        description: "Please fill in all fields.",
       });
       return;
     }
 
     setIsLoading(true);
+
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/expenses",
+      const response = await axios.patch(
+        `http://localhost:5000/api/expenses/${id}`,
         {
+          amount: parseFloat(amount),
           category,
-          amount,
-          date: date ? format(date, "yyyy-MM-dd") : null, // Format for backend
           description,
+          date: format(date, "yyyy-MM-dd"),
         },
-        { withCredentials: true }
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          withCredentials: true,
+        }
       );
 
-      if (res.status >= 200 && res.status < 300) {
+      if (response.status === 200) {
+        navigate("/dashboard");
         toast({
-          title: "Expense Addition Successful.",
-          description: "Your expense has been added.",
-        });
-
-        handleCancel();
-      } else {
-        toast({
-          title: "Uh oh! Something went wrong.",
-          description: "There was a problem with adding the expense.",
+          title: "Expense Updated Successfully",
+          description: "Your expense has been updated.",
         });
       }
-      // navigate("/dashboard");
     } catch (error) {
+      console.error("Error updating expense:", error);
       toast({
         title: "Uh oh! Something went wrong.",
-        description: "There was a problem with adding the expense.",
+        description: "There was a problem with updating the expense.",
       });
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   const handleCancel = () => {
-    setAmount("");
-    setDate(null);
-    setCategory("");
-    setDescription("");
+    navigate("/dashboard");
   };
 
   return (
     <div className="flex flex-col h-fit p-4 px-2 md:p-8 items-center">
       <h1 className="text-3xl w-[350px] sm:w-[800px] font-bold mb-4">
-        Add Expense
+        Edit Expense
       </h1>
       <div className="w-[350px] sm:w-[800px]">
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleEdit}
           className="space-y-4 w-[350px] sm:w-[600px] shadow-xl p-8"
         >
           {/* Amount Input */}
@@ -117,7 +141,7 @@ function AddExpense() {
             <Input
               type="number"
               id="amount"
-              className="max-w-[190px] sm:max-w-[350px]"
+              className="max-w-[350px]"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
             />
@@ -131,7 +155,7 @@ function AddExpense() {
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-[190px] sm:w-[350px] justify-start text-left font-normal",
+                    "w-[350px] justify-start text-left font-normal",
                     !date && "text-muted-foreground"
                   )}
                 >
@@ -159,7 +183,7 @@ function AddExpense() {
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-[190px] sm:w-[350px] justify-between font-normal"
+                  className="w-[350px] justify-between font-normal"
                 >
                   {category || "Select or enter category"}
                   <ChevronDown className="h-5 w-5" />
@@ -199,7 +223,7 @@ function AddExpense() {
             <Input
               type="text"
               id="description"
-              className="max-w-[190px] sm:max-w-[350px]"
+              className="max-w-[350px]"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -215,8 +239,11 @@ function AddExpense() {
               Cancel
             </Button>
             <Button type="submit" className="px-8" disabled={isLoading}>
-              Add{" "}
-              {isLoading && <Spinner isWhite={true} height={12} width={12} />}
+              {isLoading ? (
+                <Spinner isWhite={true} height={12} width={12} />
+              ) : (
+                "Update"
+              )}
             </Button>
           </div>
         </form>
@@ -225,4 +252,4 @@ function AddExpense() {
   );
 }
 
-export default AddExpense;
+export default EditExpense;
