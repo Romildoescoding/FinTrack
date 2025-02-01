@@ -1,2 +1,2 @@
-const backendUrl = "http://localhost:5000";
+const backendUrl = "https://fintrack-w3u5.onrender.com";
 export default backendUrl;

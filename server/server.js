@@ -9,7 +9,12 @@ import expenseRoutes from "./routes/expense.js";
 dotenv.config();
 const app = express();
 
-app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
+app.use(
+  cors({
+    credentials: true,
+    origin: "https://fin-track-theta-sandy.vercel.app/",
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
