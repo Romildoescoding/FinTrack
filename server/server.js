@@ -12,7 +12,7 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: "https://fin-track-theta-sandy.vercel.app/",
+    origin: "https://fin-track-theta-sandy.vercel.app",
   })
 );
 app.use(express.json());
