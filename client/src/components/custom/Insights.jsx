@@ -8,6 +8,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import Spinner from "./Spinner";
 
 const Insights = () => {
   const { expenses, topSpend, totalExpense, growthRate, loading } =
@@ -44,7 +45,12 @@ const Insights = () => {
           <span className="flex flex-col gap-1">
             <span className="text-zinc-700 text-sm">Total Expenses</span>
             <span className="text-zinc-900 uppercase text-2xl font-semibold">
-              ${`${totalExpense?.toLocaleString("en-US")}`}
+              $
+              {!loading ? (
+                `${totalExpense?.toLocaleString("en-US")}`
+              ) : (
+                <Spinner height={24} width={24} />
+              )}
             </span>
           </span>
         </div>
@@ -56,7 +62,7 @@ const Insights = () => {
           <span className="flex flex-col gap-1">
             <span className="text-zinc-700 text-sm">Top Spends</span>
             <span className="text-zinc-900 text-2xl font-semibold">
-              {topSpend}
+              {!loading ? topSpend : <Spinner height={24} width={24} />}
             </span>
           </span>
         </div>
@@ -68,7 +74,7 @@ const Insights = () => {
           <span className="flex flex-col gap-1">
             <span className="text-zinc-700 text-sm">Expense Growth Rate</span>
             <span className="text-zinc-900 uppercase text-2xl font-semibold">
-              {growthRate}%
+              {!loading ? `${growthRate}%` : <Spinner height={24} width={24} />}
             </span>
           </span>
         </div>

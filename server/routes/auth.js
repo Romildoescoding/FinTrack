@@ -35,7 +35,11 @@ router.post("/register", async (req, res) => {
 
     res
       .status(201)
-      .cookie("token", token, { httpOnly: true })
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      })
       .json({ message: "User registered successfully!" });
   } catch (error) {
     if (error.name === "ValidationError") {
