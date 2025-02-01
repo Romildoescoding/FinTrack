@@ -45,9 +45,8 @@ const Insights = () => {
           <span className="flex flex-col gap-1">
             <span className="text-zinc-700 text-sm">Total Expenses</span>
             <span className="text-zinc-900 uppercase text-2xl font-semibold">
-              $
               {!loading ? (
-                `${totalExpense?.toLocaleString("en-US")}`
+                `$${totalExpense?.toLocaleString("en-US")}`
               ) : (
                 <Spinner height={24} width={24} />
               )}
