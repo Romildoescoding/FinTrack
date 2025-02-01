@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
+import backendUrl from "@/services/backendUrl";
 
-export default function useExpenseInsights(last = 7) {
+export default function useExpenseInsights() {
   const [searchParams] = useSearchParams();
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +18,7 @@ export default function useExpenseInsights(last = 7) {
 
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/expenses/insights?last=${days}`,
+          `${backendUrl}/api/expenses/insights?last=${days}`,
           {
             withCredentials: true,
           }

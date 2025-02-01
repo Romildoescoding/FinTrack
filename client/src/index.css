@@ -156,7 +156,6 @@
 /* Tooltip text */
 .tooltip .tooltiptext {
   font-size: 10px;
-  /* white-space: nowrap; */
   visibility: hidden;
   width: fit-content !important;
   background-color: #27272a;
@@ -164,10 +163,8 @@
   text-align: center;
   padding: 4px 6px;
   border-radius: 6px;
-  /* Position the tooltip text - see examples below! */
   position: absolute;
   z-index: 1;
-  /* transition: visibility 0.25s; */
 }
 
 .tooltip .tooltiptext {

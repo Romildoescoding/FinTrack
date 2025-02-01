@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Spinner from "@/components/custom/Spinner";
+import backendUrl from "@/services/backendUrl";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,7 +14,6 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  // Function to validate email format
   const isValidEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
@@ -21,12 +21,10 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Reset errors
     setErrors({});
 
     let newErrors = {};
 
-    // Form validation for the Login fields...
     if (!email) {
       newErrors.email = "Email is required";
     } else if (!isValidEmail(email)) {
@@ -47,7 +45,7 @@ const Login = () => {
     try {
       setIsLoading(true);
       await axios.post(
-        "http://localhost:5000/api/auth/login",
+        `${backendUrl}/api/auth/login`,
         { email, password },
         { withCredentials: true }
       );

@@ -12,6 +12,7 @@ import {
 import { Home, HandCoins, LogOut, UserRound, Menu } from "lucide-react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
 import useUser from "./hooks/useUser";
+import backendUrl from "./services/backendUrl";
 
 const menuItems = [
   { title: "Home", url: "/dashboard", icon: Home },
@@ -25,7 +26,7 @@ export default function AppLayout() {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:5000/api/auth/logout", {
+      await fetch(`${backendUrl}/api/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -84,10 +85,8 @@ export default function AppLayout() {
             </SidebarContent>
           </Sidebar>
 
-          {/* Main Content */}
           <main className="flex-1">
             <header className="bg-white z-[2] p-4 py-2 shadow flex justify-end w-full fixed top-0 right-0">
-              {/* <SidebarTrigger /> */}
               <SidebarTrigger className="absolute top-4 left-4 z-10 p-2">
                 <Menu size={24} />
               </SidebarTrigger>

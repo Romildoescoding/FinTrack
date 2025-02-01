@@ -28,7 +28,7 @@ const Insights = () => {
                 fill="#232324"
                 radius={[8, 8, 0, 0]} // Rounded top bars
                 isAnimationActive={true} // Enable animation
-                animationDuration={2000} // Set the duration for the animation (1000ms)
+                animationDuration={1000} // Set the duration for the animation (1000ms)
                 animationEasing="ease-in-out" // Apply easing for smoothness
               />
             </BarChart>

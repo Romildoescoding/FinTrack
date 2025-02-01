@@ -1,26 +1,6 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { Button } from "@/components/ui/button";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
 import { useSearchParams } from "react-router-dom";
-import {
-  Banknote,
-  ChartColumnIncreasing,
-  Coins,
-  DollarSign,
-  TrendingUp,
-} from "lucide-react";
 import { DataTable } from "@/components/custom/DataTable";
 import { columns } from "@/components/custom/Columns";
-import useFetchExpenses from "@/hooks/useFetchExpenses";
-import useExpenseInsights from "@/hooks/useExpenseInsights";
 import Insights from "@/components/custom/Insights";
 
 function Dashboard() {

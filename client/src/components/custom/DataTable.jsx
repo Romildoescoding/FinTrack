@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "../ui/input";
-import { Ellipsis, Pen, Trash2 } from "lucide-react";
 import TableRow from "./TableRow";
 import useFetchExpenses from "@/hooks/useFetchExpenses";
 import { useSearchParams } from "react-router-dom";
@@ -14,7 +13,6 @@ export function DataTable({ pagination = true, filters = true }) {
   const [search, setSearch] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Update filteredData whenever data, search, or pagination changes
   useEffect(() => {
     let updatedData = [...data];
 
@@ -27,7 +25,7 @@ export function DataTable({ pagination = true, filters = true }) {
       );
     }
 
-    // Apply pagination
+    // Pagination
     const startIndex = (currentPage - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
 
@@ -45,13 +43,12 @@ export function DataTable({ pagination = true, filters = true }) {
     setSearchParams(searchParams);
   }, [currentPage, rowsPerPage, searchParams, setSearchParams]);
 
-  const totalPages = Math.ceil(totalCount / rowsPerPage); // Use totalCount to calculate total pages
+  const totalPages = Math.ceil(totalCount / rowsPerPage);
 
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
-  // Handle deleting an expense
   const handleDeleteExpense = (id) => {
     setData((prev) => prev.filter((expense) => expense._id !== id));
   };

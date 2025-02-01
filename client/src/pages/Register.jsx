@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Spinner from "@/components/custom/Spinner";
+import backendUrl from "@/services/backendUrl";
 
 function Register() {
   const [firstName, setFirstName] = useState("");
@@ -15,19 +16,11 @@ function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  //Errors object owuld contain the corresponding errors to the input fields as follows->
-  // {
-  //   firstName :"First Name is required",
-  //   lastName :"First Name is required",
-  //   email: "Invalid Email",
-  //   password:"Min password length",
-  //   confirmPassword : "Passwords do not match"
-  // }
   const [errors, setErrors] = useState({});
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setErrors({}); // Clear previous errors
+    setErrors({});
 
     const newErrors = {};
 
@@ -61,7 +54,7 @@ function Register() {
     try {
       setIsLoading(true);
       await axios.post(
-        "http://localhost:5000/api/auth/register",
+        `${backendUrl}/api/auth/register`,
         {
           firstName,
           lastName,
@@ -76,7 +69,7 @@ function Register() {
       setIsLoading(false);
 
       if (error.response && error.response.data.errors) {
-        setErrors(error.response.data.errors); // Backend validation errors
+        setErrors(error.response.data.errors);
       } else {
         console.error("Registration failed", error);
       }

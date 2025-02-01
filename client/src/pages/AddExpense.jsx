@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
@@ -21,7 +19,7 @@ import {
 } from "@/components/ui/command";
 import Spinner from "@/components/custom/Spinner";
 import { useToast } from "@/hooks/use-toast";
-// import { useNavigate } from "react-router-dom";
+import backendUrl from "@/services/backendUrl";
 
 const categories = [
   "Food",
@@ -39,14 +37,12 @@ function AddExpense() {
   const [date, setDate] = useState();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  // const navigate = useNavigate();
 
   const { toast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // **Frontend Validation**
     if (!amount || !date || !category || !description) {
       toast({
         title: "Missing Fields",
@@ -58,11 +54,11 @@ function AddExpense() {
     setIsLoading(true);
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/expenses",
+        `${backendUrl}/api/expenses`,
         {
           category,
           amount,
-          date: date ? format(date, "yyyy-MM-dd") : null, // Format for backend
+          date: date ? format(date, "yyyy-MM-dd") : null,
           description,
         },
         { withCredentials: true }
@@ -81,7 +77,6 @@ function AddExpense() {
           description: "There was a problem with adding the expense.",
         });
       }
-      // navigate("/dashboard");
     } catch (error) {
       toast({
         title: "Uh oh! Something went wrong.",
@@ -109,7 +104,6 @@ function AddExpense() {
           onSubmit={handleSubmit}
           className="space-y-4 w-[350px] sm:w-[600px] shadow-xl p-8"
         >
-          {/* Amount Input */}
           <div className="flex justify-between items-center">
             <label htmlFor="amount" className="font-semibold">
               Amount
@@ -123,7 +117,6 @@ function AddExpense() {
             />
           </div>
 
-          {/* Date Picker */}
           <div className="flex justify-between items-center">
             <label className="font-semibold">Date</label>
             <Popover>
@@ -150,7 +143,6 @@ function AddExpense() {
             </Popover>
           </div>
 
-          {/* Category Dropdown with Search + Custom Input */}
           <div className="flex justify-between items-center">
             <label htmlFor="category" className="font-semibold">
               Category
@@ -170,7 +162,7 @@ function AddExpense() {
                   <CommandInput
                     placeholder="Search or enter category..."
                     value={category}
-                    onValueChange={setCategory} // Ensures input is properly controlled
+                    onValueChange={setCategory}
                   />
                   <CommandList className=" p-1">
                     {categories.map((item) => (
@@ -179,7 +171,7 @@ function AddExpense() {
                         className="cursor-pointer"
                         onSelect={() => {
                           setCategory(item);
-                          setOpen(false); // Closes the dropdown after selection
+                          setOpen(false);
                         }}
                       >
                         {item}
@@ -191,7 +183,6 @@ function AddExpense() {
             </Popover>
           </div>
 
-          {/* Description Input */}
           <div className="flex justify-between items-center">
             <label htmlFor="description" className="font-semibold">
               Description
@@ -205,7 +196,6 @@ function AddExpense() {
             />
           </div>
 
-          {/* Submit & Cancel Buttons */}
           <div className="w-full h-fit flex gap-2 justify-end">
             <Button
               className="bg-zinc-100 text-zinc-900 hover:bg-zinc-200 px-8"

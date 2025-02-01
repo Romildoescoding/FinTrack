@@ -22,7 +22,6 @@ const TableRow = ({ entry, onDelete }) => {
         }
       );
 
-      // Axios stores the response status in `res.status`
       setShowOptions("");
       if (res.status >= 200 && res.status < 300) {
         onDelete(entry._id);
@@ -48,16 +47,13 @@ const TableRow = ({ entry, onDelete }) => {
 
   return (
     <tr className="border-t relative overflow-visible font-normal">
-      {/* Mapping the data fields to rows */}
       <td className="px-3 text-sm text-gray-700">
         <span>{entry.category}</span>
       </td>
       <td className="px-3 text-sm text-gray-700">
-        {/* Format the amount as currency */}
         <span>{`$${entry.amount.toFixed(2)}`}</span>
       </td>
       <td className="px-3 text-sm text-gray-700">
-        {/* Format the date */}
         <span>{formatDate(entry.date, "MMM dd, yyyy")}</span>
       </td>
       <td className="px-3 text-sm text-gray-700">
@@ -68,7 +64,6 @@ const TableRow = ({ entry, onDelete }) => {
         </span>
       </td>
 
-      {/* Modal for options selection */}
       {showOptions === "options" && (
         <Modal
           className="top-12 right-36 absolute"
@@ -133,7 +128,6 @@ const TableRow = ({ entry, onDelete }) => {
         </Modal>
       )}
 
-      {/* Options button */}
       <button
         className="absolute hover:bg-zinc-200 p-1 rounded-sm h-fit flex items-center right-4 top-1/2 -translate-y-1/2 focus:ring-black"
         onClick={() => setShowOptions("options")}

@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
+import backendUrl from "@/services/backendUrl";
 
 export default function useFetchExpenses() {
   const [searchParams] = useSearchParams();
   const [data, setData] = useState([]);
-  const [totalCount, setTotalCount] = useState(0); // Store the total count of expenses
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,7 +16,7 @@ export default function useFetchExpenses() {
       setLoading(true);
 
       await axios
-        .get(`http://localhost:5000/api/expenses?page=${page}&limit=${limit}`, {
+        .get(`${backendUrl}/api/expenses?page=${page}&limit=${limit}`, {
           withCredentials: true,
         })
         .then((res) => {

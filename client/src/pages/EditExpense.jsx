@@ -22,6 +22,7 @@ import {
 import Spinner from "@/components/custom/Spinner";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useParams } from "react-router-dom";
+import backendUrl from "@/services/backendUrl";
 
 const categories = [
   "Food",
@@ -48,7 +49,7 @@ function EditExpense() {
     async function fetchExpense() {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/expenses/expense/${id}`,
+          `${backendUrl}/api/expenses/expense/${id}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -86,7 +87,7 @@ function EditExpense() {
 
     try {
       const response = await axios.patch(
-        `http://localhost:5000/api/expenses/${id}`,
+        `${backendUrl}/api/expenses/${id}`,
         {
           amount: parseFloat(amount),
           category,

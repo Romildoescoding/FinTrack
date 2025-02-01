@@ -1,3 +1,4 @@
+import backendUrl from "@/services/backendUrl";
 import { useEffect, useState } from "react";
 
 export default function useUser() {
@@ -8,7 +9,7 @@ export default function useUser() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/auth/user", {
+        const res = await fetch(`${backendUrl}/api/auth/user`, {
           method: "GET",
           credentials: "include",
         });
