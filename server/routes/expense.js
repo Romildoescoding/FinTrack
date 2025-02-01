@@ -61,18 +61,21 @@ router.post("/", authenticateToken, async (req, res) => {
 });
 
 router.get("/", authenticateToken, async (req, res) => {
-  // console.log("GET EXPENSES!!");
-  const { category, startDate, endDate, page = 1 } = req.query;
+  const { last, page = 1 } = req.query;
 
   // Using req.user to filter expenses by logged-in user
   const query = { user: req.user.id };
 
-  // Adding category filter if provided
-  if (category) query.category = category;
+  // Calculate the date range based on the "last" parameter (7, 30, or 90 days)
+  let startDate = null;
+  if (last) {
+    const daysAgo = parseInt(last, 10);
+    startDate = new Date();
+    startDate.setDate(startDate.getDate() - daysAgo); // Calculate start date based on the "last" parameter
+  }
 
-  // Adding date range filter if both startDate and endDate are provided
-  if (startDate && endDate) {
-    query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+  if (startDate) {
+    query.date = { $gte: startDate };
   }
 
   // Mongoose projection to fetch only the required fields (amount, category, date)
@@ -81,14 +84,12 @@ router.get("/", authenticateToken, async (req, res) => {
     .limit(10)
     .skip((page - 1) * 10);
 
-  // console.log(expenses);
-
   res.json(expenses);
 });
 
 router.delete("/:id", authenticateToken, async (req, res) => {
   await Expense.findByIdAndDelete(req.params.id);
-  res.json({ message: "Expense deleted" });
+  res.status(200).json({ status: "success", message: "Expense deleted" });
 });
 
 router.patch("/:id", authenticateToken, async (req, res) => {

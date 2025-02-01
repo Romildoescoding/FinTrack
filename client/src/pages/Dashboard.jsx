@@ -20,43 +20,20 @@ import {
 import { DataTable } from "@/components/custom/DataTable";
 import { columns } from "@/components/custom/Columns";
 
-// const columns = [
-//   {
-//     id: "name",
-//     Header: () => <span>Expense Name</span>, // You can use JSX for custom rendering
-//     renderHeader: () => <span>Expense Name</span>, // You can use JSX for custom rendering
-//     accessor: "name",
-//   },
-//   {
-//     id: "category",
-//     Header: () => <span>Category</span>, // Custom rendering if needed
-//     renderHeader: () => <span>Expense Name</span>, // You can use JSX for custom rendering
-//     accessor: "category",
-//   },
-//   {
-//     id: "amount",
-//     Header: () => <span>Amount</span>,
-//     renderHeader: () => <span>Expense Name</span>, // You can use JSX for custom rendering
-//     accessor: "amount",
-//     Cell: ({ value }) => `$${value.toLocaleString()}`,
-//   },
-//   {
-//     id: "date",
-//     Header: () => <span>Date</span>,
-//     renderHeader: () => <span>Expense Name</span>, // You can use JSX for custom rendering
-//     accessor: "date",
-//     Cell: ({ value }) => new Date(value).toLocaleDateString(),
-//   },
-// ];
-
 function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [expenses, setExpenses] = useState([]);
   const [data, setData] = useState([]);
 
   useEffect(() => {
+    // Extract the 'last' query parameter
+    const last = searchParams.get("last");
+
+    // Fetch expenses based on the filter
     axios
-      .get("http://localhost:5000/api/expenses", { withCredentials: true })
+      .get(`http://localhost:5000/api/expenses?last=${last || 7}`, {
+        withCredentials: true,
+      })
       .then((res) => {
         // Group data by category
         const groupedData = res.data.reduce((acc, item) => {
@@ -72,11 +49,7 @@ function Dashboard() {
         // Set data for the table as well
         setData(res.data);
       });
-  }, []);
-
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
+  }, [searchParams]); // Trigger the effect when the search params change
 
   const updateFilter = (days) => {
     setSearchParams({ last: days });
@@ -183,28 +156,15 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* <div className="w-full mt-4 h-44 bg-black rounded-md"></div> */}
-
       {/* Data Table */}
       <div className="container mx-auto py-10">
-        {/* Data Table */}
-        <div className="">
-          <DataTable
-            data={data}
-            columns={columns}
-            pagination={true} // Enable pagination
-            filters={true} // Enable filtering
-          />
-        </div>
+        <DataTable
+          data={data}
+          columns={columns}
+          pagination={true} // Enable pagination
+          filters={true} // Enable filtering
+        />
       </div>
-
-      {/* Add Expense Button */}
-      {/* <Button
-        className="mt-4"
-        onClick={() => (window.location.href = "/add-expense")}
-      >
-        Add Expense
-      </Button> */}
     </div>
   );
 }

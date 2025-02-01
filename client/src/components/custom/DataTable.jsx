@@ -1,29 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "../ui/input";
-import { formatDate } from "date-fns";
 import { Ellipsis, Pen, Trash2 } from "lucide-react";
-import Modal from "./Modal";
 import TableRow from "./TableRow";
 
 export function DataTable({ data, pagination = true, filters = true }) {
+  const [expenses, setExpenses] = useState(data);
+  const [filteredData, setFilteredData] = useState(data);
   const [currentPage, setCurrentPage] = useState(1);
-
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [search, setSearch] = useState("");
 
-  // Handle Pagination
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const currentData = data.slice(startIndex, endIndex);
+  // Update filteredData whenever expenses, search, or pagination changes
+  useEffect(() => {
+    setExpenses(data); // Ensure expenses updates when data changes
+  }, [data]);
 
-  // Handle Search Filtering
-  const filteredData = currentData.filter((row) => {
-    return Object.values(row).some((val) =>
-      String(val).toLowerCase().includes(search.toLowerCase())
-    );
-  });
+  useEffect(() => {
+    let updatedData = [...expenses];
 
-  const totalPages = Math.ceil(data.length / rowsPerPage);
+    // Apply search filter
+    if (search.trim() !== "") {
+      updatedData = updatedData.filter((row) =>
+        Object.values(row).some((val) =>
+          String(val).toLowerCase().includes(search.toLowerCase())
+        )
+      );
+    }
+
+    // Apply pagination
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+
+    setFilteredData(updatedData.slice(startIndex, endIndex));
+  }, [expenses, search, currentPage, rowsPerPage]);
+
+  // Handle deleting an expense
+  const handleDeleteExpense = (id) => {
+    setExpenses((prev) => prev.filter((expense) => expense._id !== id));
+  };
+
+  const totalPages = Math.ceil(expenses.length / rowsPerPage);
 
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -54,11 +70,10 @@ export function DataTable({ data, pagination = true, filters = true }) {
       )}
 
       {/* Table */}
-      <div className=" rounded-md shadow-sm border bg-gray-50">
+      <div className="rounded-md shadow-sm border bg-gray-50">
         <table className="min-w-full table-auto">
           <thead className="bg-zinc-900 text-zinc-50 uppercase">
             <tr>
-              {/* Hardcoded Column Headers */}
               <th className="px-6 py-3 text-left text-sm font-medium tracking-wider">
                 Category
               </th>
@@ -68,20 +83,26 @@ export function DataTable({ data, pagination = true, filters = true }) {
               <th className="px-6 py-3 text-left text-sm font-medium tracking-wider">
                 Date
               </th>
-
               <th className="px-6 py-3 text-left text-sm font-medium tracking-wider">
                 Description
               </th>
+              <th className="px-6 py-3 text-left text-sm font-medium tracking-wider">
+                Actions
+              </th>
             </tr>
           </thead>
-          <tbody className=" overflow-hidden">
+          <tbody>
             {filteredData.length > 0 ? (
               filteredData.map((entry, index) => (
-                <TableRow entry={entry} key={index} />
+                <TableRow
+                  key={index}
+                  entry={entry}
+                  onDelete={handleDeleteExpense}
+                />
               ))
             ) : (
               <tr>
-                <td colSpan={3} className="text-center py-4 text-gray-500">
+                <td colSpan={5} className="text-center py-4 text-gray-500">
                   No results found.
                 </td>
               </tr>
@@ -94,11 +115,15 @@ export function DataTable({ data, pagination = true, filters = true }) {
       {pagination && (
         <div className="flex items-center justify-between py-4">
           <div className="text-sm text-gray-500">
-            Showing <span className="font-bold">{startIndex + 1}</span> to{" "}
+            Showing{" "}
             <span className="font-bold">
-              {endIndex > data.length ? data.length : endIndex}
+              {(currentPage - 1) * rowsPerPage + 1}
             </span>{" "}
-            of <span className="font-bold">{data.length}</span> entries
+            to{" "}
+            <span className="font-bold">
+              {Math.min(currentPage * rowsPerPage, expenses.length)}
+            </span>{" "}
+            of <span className="font-bold">{expenses.length}</span> entries
           </div>
           <div className="flex space-x-2">
             <button
