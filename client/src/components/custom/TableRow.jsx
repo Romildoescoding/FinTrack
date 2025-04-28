@@ -5,6 +5,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import backendUrl from "@/services/backendUrl";
 
 const TableRow = ({ entry, onDelete }) => {
   const [showOptions, setShowOptions] = useState("");
@@ -16,7 +17,7 @@ const TableRow = ({ entry, onDelete }) => {
 
     try {
       const res = await axios.delete(
-        `http://localhost:5000/api/expenses/${entry._id}`,
+        `${backendUrl}/api/expenses/${entry._id}`,
         {
           withCredentials: true,
         }
